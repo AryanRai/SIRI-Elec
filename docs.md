@@ -277,6 +277,23 @@ struct TelemetryMessage {
 #define LOG_BUFFER_SIZE         1024
 ```
 
+### CAN Transceiver Selection
+
+#### Hardware Requirements
+- **Jetson Backplane**: SN65HVD230 (3.3V compatible with Jetson GPIO)
+- **HAT Modules (Teensy)**: TJA1050 (5V tolerant, robust for distributed modules)
+
+#### Transceiver Specifications
+```cpp
+// Jetson Backplane Configuration
+#define JETSON_CAN_TRANSCEIVER "SN65HVD230"
+#define JETSON_CAN_VOLTAGE 3.3f
+
+// HAT Module Configuration  
+#define HAT_CAN_TRANSCEIVER "TJA1050"
+#define HAT_CAN_VOLTAGE 5.0f
+```
+
 ### Implementation Guidelines
 
 1. **Thread Safety**: All CAN operations must be thread-safe
@@ -284,6 +301,7 @@ struct TelemetryMessage {
 3. **Memory Management**: Use static allocation for real-time paths
 4. **Error Recovery**: Implement graceful degradation on component failure
 5. **Testing**: All HATs must pass CAN network compliance tests
+6. **Transceiver Compatibility**: Ensure proper voltage levels for each platform
 
 ## State Machine API
 
@@ -367,3 +385,38 @@ public:
     void testEmergencyScenarios();  // New: Emergency testing
 };
 ```
+
+## Arduino IDE Development
+
+### Project Structure
+HAT firmware uses Arduino IDE with organized include/src structure:
+```
+TemplateHAT_Firmware/
+├── TemplateHAT_Firmware.ino  # Main sketch
+├── include/                  # Header files
+│   ├── hat_config.h         # Configuration
+│   ├── can_protocol.h       # CAN definitions
+│   ├── state_machine.h      # State machine
+│   └── ...                  # Other headers
+└── src/                     # Implementation files
+    ├── can_interface.cpp    # CAN implementation
+    ├── state_machine.cpp    # State machine logic
+    └── ...                  # Other implementations
+```
+
+### Required Libraries
+- **FlexCAN_T4**: CAN communication for Teensy 4.1
+- **ArduinoJson**: JSON parsing and configuration
+
+### Development Workflow
+1. **Open Arduino IDE** with Teensyduino installed
+2. **Load sketch**: Open TemplateHAT_Firmware.ino
+3. **Install libraries**: Use Library Manager for dependencies
+4. **Configure board**: Select Teensy 4.1, 600MHz, Serial USB
+5. **Customize**: Edit include/hat_config.h for your HAT
+6. **Upload**: Connect Teensy and upload firmware
+
+### Debugging
+- **Serial Monitor**: 115200 baud for debug output
+- **LED Indicators**: Status, error, and communication LEDs
+- **CAN Analyzer**: Use external tools for network debugging
