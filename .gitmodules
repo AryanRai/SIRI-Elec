@@ -1,0 +1,6 @@
+[submodule "TemplateHAT"]
+	path = TemplateHAT
+	url = https://github.com/AryanRai/SIRI-Template-HAT.git
+[submodule "ArmHAT"]
+	path = ArmHAT
+	url = https://github.com/AryanRai/SIRI-Arm-HAT.git
