@@ -195,7 +195,7 @@ graph TB
 #### Backplane
 - **Central compute node**: Jetson Orin Nano with ARM Cortex-A78AE
 - **Dual CAN transceivers**: SN65HVD230 (3.3V compatible) with redundancy for fault tolerance
-- **Multiple HAT slots**: 6x 40-pin GPIO connectors for expansion
+- **Multiple HAT slots**: 6x VGA connectors for expansion
 - **Power distribution**: Regulated 5V/3.3V supply to all HATs
 - **Broadcast communication**: Priority-based CAN arbitration
 
