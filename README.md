@@ -196,7 +196,7 @@ graph TB
 - **Central compute node**: Jetson Orin Nano with ARM Cortex-A78AE
 - **Dual CAN transceivers**: SN65HVD230 (3.3V compatible) with redundancy for fault tolerance
 - **Multiple HAT slots**: 6x VGA connectors for expansion
-- **Power distribution**: Regulated 5V/3.3V supply to all HATs
+- **Power distribution**: Regulated 5V supply to all HATs
 - **Broadcast communication**: Priority-based CAN arbitration
 
 #### HAT Modules
