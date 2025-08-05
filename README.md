@@ -247,30 +247,46 @@ SIRI-Elec/
 
 ## Getting Started
 
+**🚀 New to SIRI-Elec? Start here: [GETTING_STARTED.md](GETTING_STARTED.md)**
+
+Our comprehensive getting started guide covers:
+- **Development environment setup** (Arduino IDE, VS Code, Teensyduino)
+- **AI development tools** - Cursor, Kiro, Claude models, ChatGPT, and more
+- **Cost-effective AI usage** strategies for different development phases
+- **Step-by-step tutorials** for building your first HAT
+- **Troubleshooting** common issues
+- **Best practices** for HAT development
+
+### Quick Setup
 1. **Clone with submodules**:
    ```bash
    git clone --recursive https://github.com/your-org/SIRI-Elec.git
    ```
 
-2. **Initialize submodules** (if already cloned):
-   ```bash
-   git submodule update --init --recursive
-   ```
+2. **Follow the setup guide**: [GETTING_STARTED.md](GETTING_STARTED.md)
 
-3. **Review hardware mappings**: See [hw_inf_mappings.md](hw_inf_mappings.md) for CAN addresses and component assignments
-
-4. **Check technical documentation**: See [docs.md](docs.md) for detailed API specifications
-
-5. **Understand the architecture**: Review [architecture.md](architecture.md) for system design details
+3. **Review documentation**:
+   - [hw_inf_mappings.md](hw_inf_mappings.md) - CAN addresses and component assignments
+   - [docs.md](docs.md) - Technical API specifications  
+   - [architecture.md](architecture.md) - System design details
 
 ## Development
 
 ### Creating New HATs
-1. Use [TemplateHAT/](TemplateHAT/) as starting point
-2. Assign addresses from [hw_inf_mappings.md](hw_inf_mappings.md)
-3. Implement required interface methods from [docs.md](docs.md)
-4. Follow state machine requirements in [state_machine.md](state_machine.md)
-5. Test on CAN network before integration
+1. **Start with template**: Use [TemplateHAT/](TemplateHAT/) as your foundation
+2. **Setup environment**: Follow [GETTING_STARTED.md](GETTING_STARTED.md) for IDE and AI tool setup
+3. **Choose AI tools**: See [AI Development Tools](GETTING_STARTED.md#-ai-development-tools) section for recommendations
+4. **Assign addresses**: Reserve addresses from [hw_inf_mappings.md](hw_inf_mappings.md)
+5. **Implement interfaces**: Follow specifications in [docs.md](docs.md)
+6. **Follow state machine**: Implement requirements from [state_machine.md](state_machine.md)
+7. **Test thoroughly**: Validate on CAN network before integration
+
+### AI Development Tools
+Our [getting started guide](GETTING_STARTED.md#-ai-development-tools) provides detailed recommendations:
+- **AI IDEs**: Cursor (prototyping), Kiro (waitlist), Windsurf, VS Code + Copilot
+- **AI Models**: Claude 4 (large codebases), Claude 3.5 (specific problems), ChatGPT (learning)
+- **Cost strategies**: How to use expensive models effectively
+- **Use case guidance**: Which tool for which development phase
 
 ### Testing
 CAN network testing tools are available in `HwInf/Testing/` - see [architecture.md](architecture.md) for testing workflow
@@ -314,7 +330,8 @@ stateDiagram-v2
 
 ## Documentation
 
-- **Overview**: This README - System overview and getting started guide
+- **[Getting Started Guide](GETTING_STARTED.md)** - Complete setup guide for new developers with AI tools
+- **Overview**: This README - System overview and project structure
 - **[Architecture](architecture.md)** - Detailed system diagrams, PCB layouts, and design specifications
 - **[Technical APIs](docs.md)** - CAN network protocols, HAT interfaces, and implementation guidelines
 - **[Hardware Mappings](hw_inf_mappings.md)** - CAN addresses, component assignments, and message structure
