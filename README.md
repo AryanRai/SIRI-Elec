@@ -103,7 +103,6 @@ graph TB
         end
     end
     
-    %% Connections
     CAN1 --- CANBus
     CAN2 --- CANBus
     D_CAN --- CANBus
@@ -121,17 +120,6 @@ graph TB
     
     Jetson -.->|WiFi| BaseStation
     BaseStation -.->|Commands| Operator
-    
-    %% Styling
-    classDef backplane fill:#e1f5fe
-    classDef hat fill:#f3e5f5
-    classDef external fill:#e8f5e8
-    classDef canbus fill:#fff3e0
-    
-    class Jetson,CAN1,CAN2,Power backplane
-    class D_MCU,A_MCU,B_MCU,S_MCU,SC_MCU,D_CAN,A_CAN,B_CAN,S_CAN,SC_CAN hat
-    class BaseStation,Operator,Battery external
-    class CANBus canbus
 ```
 
 ### Hardware Interface Framework
@@ -185,7 +173,6 @@ graph LR
         TemplateCard[TemplateHat<br/>━━━━━━━━━━<br/>Base Template<br/>CAN Interface<br/>State Machine]
     end
     
-    %% Physical connections
     Slot1 ---|40-pin| DriveCard
     Slot2 ---|40-pin| ArmCard
     Slot3 ---|40-pin| BPSCard
@@ -193,7 +180,6 @@ graph LR
     Slot5 ---|40-pin| SciCard
     Slot6 ---|40-pin| TemplateCard
     
-    %% CAN bus connections
     CAN_Primary --- Slot1
     CAN_Primary --- Slot2
     CAN_Primary --- Slot3
@@ -201,24 +187,12 @@ graph LR
     CAN_Primary --- Slot5
     CAN_Primary --- Slot6
     
-    %% Power connections
     PowerDist --- Slot1
     PowerDist --- Slot2
     PowerDist --- Slot3
     PowerDist --- Slot4
     PowerDist --- Slot5
     PowerDist --- Slot6
-    
-    %% Styling
-    classDef backplane fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
-    classDef hat fill:#f1f8e9,stroke:#388e3c,stroke-width:2px
-    classDef compute fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    classDef power fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    
-    class Jetson,Memory compute
-    class CAN_Primary,CAN_Backup,CAN_Term,Slot1,Slot2,Slot3,Slot4,Slot5,Slot6 backplane
-    class PowerReg,PowerDist,PowerMon power
-    class DriveCard,ArmCard,BPSCard,SenseCard,SciCard,TemplateCard hat
 ```
 
 ### Key Components
@@ -268,9 +242,12 @@ SIRI-Elec/
 ├── TemplateHAT/          # Base HAT template (submodule)
 ├── ArmHAT/               # Arm control HAT (submodule)
 ├── HwInf/                # Hardware interface implementations
-├── hw_inf_mappings.md    # Address and component mappings
+│   └── Testing/          # CAN network testing tools
+├── README.md             # This overview and getting started
+├── architecture.md       # Detailed system architecture and diagrams
 ├── docs.md               # Technical API documentation
-└── README.md             # This overview
+├── hw_inf_mappings.md    # CAN addresses and component mappings
+└── state_machine.md      # State machine specifications and use cases
 ```
 
 ## Getting Started
@@ -285,20 +262,23 @@ SIRI-Elec/
    git submodule update --init --recursive
    ```
 
-3. **Review hardware mappings**: See `hw_inf_mappings.md` for CAN addresses and component assignments
+3. **Review hardware mappings**: See [hw_inf_mappings.md](hw_inf_mappings.md) for CAN addresses and component assignments
 
-4. **Check technical documentation**: See `docs.md` for detailed API specifications
+4. **Check technical documentation**: See [docs.md](docs.md) for detailed API specifications
+
+5. **Understand the architecture**: Review [architecture.md](architecture.md) for system design details
 
 ## Development
 
 ### Creating New HATs
-1. Use `TemplateHAT/` as starting point
-2. Assign addresses from `hw_inf_mappings.md`
-3. Implement required interface methods
-4. Test on CAN network before integration
+1. Use [TemplateHAT/](TemplateHAT/) as starting point
+2. Assign addresses from [hw_inf_mappings.md](hw_inf_mappings.md)
+3. Implement required interface methods from [docs.md](docs.md)
+4. Follow state machine requirements in [state_machine.md](state_machine.md)
+5. Test on CAN network before integration
 
 ### Testing
-CAN network testing tools are available in `HwInf/Testing/`
+CAN network testing tools are available in `HwInf/Testing/` - see [architecture.md](architecture.md) for testing workflow
 
 ## State Machine Architecture
 
@@ -339,9 +319,38 @@ stateDiagram-v2
 
 ## Documentation
 
-- **Overview**: This README
-- **Architecture**: `architecture.md` - Detailed system diagrams and design
-- **Technical APIs**: `docs.md`
-- **Hardware Mappings**: `hw_inf_mappings.md`
-- **State Machine**: `state_machine.md`
-- **Individual HATs**: See respective submodule documentation
+- **Overview**: This README - System overview and getting started guide
+- **[Architecture](architecture.md)** - Detailed system diagrams, PCB layouts, and design specifications
+- **[Technical APIs](docs.md)** - CAN network protocols, HAT interfaces, and implementation guidelines
+- **[Hardware Mappings](hw_inf_mappings.md)** - CAN addresses, component assignments, and message structure
+- **[State Machine](state_machine.md)** - Safety states, transitions, and mission use cases
+- **Individual HATs**: 
+  - [TemplateHAT](TemplateHAT/) - Base template for new HAT development
+  - [ArmHAT](ArmHAT/) - Robotic arm control implementation
+
+## Contributing
+
+We welcome contributions to SIRI-Elec! Here's how to get started:
+
+### Quick Start
+1. **Fork the repository** and clone with submodules
+2. **Create a feature branch**: `git checkout -b feature/your-feature-name`
+3. **Follow the coding standards** outlined in [docs.md](docs.md)
+4. **Test your changes** using the tools in `HwInf/Testing/`
+5. **Submit a pull request** with a clear description
+
+### Development Guidelines
+- **HAT Development**: Use [TemplateHAT](TemplateHAT/) as your starting point
+- **Address Assignment**: Reserve addresses in [hw_inf_mappings.md](hw_inf_mappings.md)
+- **State Machine**: Implement the standardized states from [state_machine.md](state_machine.md)
+- **Documentation**: Update relevant docs when adding features
+- **Testing**: Ensure CAN network compatibility before submission
+
+### Areas for Contribution
+- New HAT module implementations
+- CAN network testing tools
+- State machine enhancements
+- Documentation improvements
+- Hardware validation and testing
+
+For detailed technical specifications, see our [technical documentation](docs.md).

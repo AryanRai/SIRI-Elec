@@ -41,7 +41,6 @@ graph TB
         end
     end
     
-    %% Connections
     Jetson --- CAN_IC1
     Jetson --- CAN_IC2
     CAN_IC1 --- CAN_Conn
@@ -97,7 +96,6 @@ graph LR
         end
     end
     
-    %% Connections
     Connector --- MCU
     MCU --- CAN_Trans
     MCU --- StateMachine
@@ -161,7 +159,6 @@ graph TB
         end
     end
     
-    %% Network connections
     J --- CANBus
     D --- CANBus
     B --- CANBus
@@ -169,7 +166,6 @@ graph TB
     S --- CANBus
     SE --- CANBus
     
-    %% Component connections
     D --- D_Motors
     D --- D_Encoders
     D --- D_IMU
@@ -360,7 +356,6 @@ graph TB
         ThermalProt[Thermal Protection<br/>85°C Cutoff]
     end
     
-    %% Power flow
     Battery --- MainSwitch
     MainSwitch --- Fuse
     Fuse --- OVP
@@ -379,7 +374,6 @@ graph TB
     
     SecondaryReg --- Logic_3V3
     
-    %% Protection connections
     PowerMon --- OCP
     PrimaryReg --- ThermalProt
     SecondaryReg --- ThermalProt
@@ -409,7 +403,6 @@ graph LR
         SystemTests[System Tests<br/>Full Network]
     end
     
-    %% Development flow
     IDE --> Simulator
     Simulator --> UnitTests
     UnitTests --> Breadboard
@@ -418,7 +411,6 @@ graph LR
     IntegrationTests --> FullSystem
     FullSystem --> SystemTests
     
-    %% Analysis tools
     CANAnalyzer --> TestHAT
     CANAnalyzer --> FullSystem
     CANAnalyzer --> SystemTests
