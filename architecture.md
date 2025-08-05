@@ -8,6 +8,10 @@ The SIRI-Elec system implements a modular, distributed architecture centered aro
 
 ### Backplane Design
 
+**CAN Transceiver Selection:**
+- **Jetson Backplane**: SN65HVD230 (3.3V compatible with Jetson GPIO)
+- **HAT Modules (Teensy)**: TJA1050 (5V tolerant, robust for distributed modules)
+
 ```mermaid
 graph TB
     subgraph "Backplane PCB Layout"
@@ -18,8 +22,8 @@ graph TB
         end
         
         subgraph "Middle Section - Communication"
-            CAN_IC1[TJA1050 #1<br/>Primary CAN]
-            CAN_IC2[TJA1050 #2<br/>Backup CAN]
+            CAN_IC1[SN65HVD230 #1<br/>Primary CAN]
+            CAN_IC2[SN65HVD230 #2<br/>Backup CAN]
             CAN_Conn[CAN Bus Connector<br/>CANH/CANL/GND]
             Term_R[120Ω Termination<br/>Jumper Selectable]
         end
@@ -120,8 +124,10 @@ graph TB
         
         subgraph "Priority 2 - DriveHat"
             D[DriveHat MCU<br/>Node ID: 0x02<br/>Address: 0x200-0x2FF]
-            D_Motors[4x Motor Controllers<br/>0x210-0x213]
-            D_Encoders[4x Encoders<br/>0x220-0x223]
+            D_Drive[4x Drive Motors<br/>0x210-0x213]
+            D_Steer[4x Steer Motors<br/>0x214-0x217]
+            D_DriveEnc[4x Drive Encoders<br/>0x220-0x223]
+            D_SteerEnc[4x Steer Encoders<br/>0x224-0x227]
             D_IMU[IMU/Odometry<br/>0x230-0x23F]
         end
         
@@ -166,8 +172,10 @@ graph TB
     S --- CANBus
     SE --- CANBus
     
-    D --- D_Motors
-    D --- D_Encoders
+    D --- D_Drive
+    D --- D_Steer
+    D --- D_DriveEnc
+    D --- D_SteerEnc
     D --- D_IMU
     
     B --- B_Voltage

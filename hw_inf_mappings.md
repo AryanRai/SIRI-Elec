@@ -19,16 +19,26 @@ Based on the CAN arbitration system, lower priority numbers have higher preceden
 ### DriveHat (Priority 2, Base Address: 0x200)
 ```
 Components:
-- Motor Controllers: 0x210-0x21F
-  - Left Front: 0x210
-  - Right Front: 0x211
-  - Left Rear: 0x212
-  - Right Rear: 0x213
-- Encoders: 0x220-0x22F
-  - Left Front Encoder: 0x220
-  - Right Front Encoder: 0x221
-  - Left Rear Encoder: 0x222
-  - Right Rear Encoder: 0x223
+- Drive Motor Controllers: 0x210-0x217
+  - Left Front Drive: 0x210
+  - Right Front Drive: 0x211
+  - Left Rear Drive: 0x212
+  - Right Rear Drive: 0x213
+- Steer Motor Controllers: 0x214-0x217
+  - Left Front Steer: 0x214
+  - Right Front Steer: 0x215
+  - Left Rear Steer: 0x216
+  - Right Rear Steer: 0x217
+- Drive Encoders: 0x220-0x227
+  - Left Front Drive Encoder: 0x220
+  - Right Front Drive Encoder: 0x221
+  - Left Rear Drive Encoder: 0x222
+  - Right Rear Drive Encoder: 0x223
+- Steer Encoders: 0x224-0x227
+  - Left Front Steer Encoder: 0x224
+  - Right Front Steer Encoder: 0x225
+  - Left Rear Steer Encoder: 0x226
+  - Right Rear Steer Encoder: 0x227
 - IMU/Odometry: 0x230-0x23F
 ```
 

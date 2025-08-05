@@ -130,20 +130,39 @@ public:
 ```cpp
 class DriveHat : public HATInterface {
 public:
-    // Motor control
-    bool setMotorSpeed(uint8_t motorId, int16_t speed);
-    bool setMotorDirection(uint8_t motorId, uint8_t direction);
-    bool enableMotor(uint8_t motorId);
-    bool disableMotor(uint8_t motorId);
+    // Drive motor control
+    bool setDriveSpeed(uint8_t wheelId, int16_t speed);
+    bool setDriveDirection(uint8_t wheelId, uint8_t direction);
+    bool enableDriveMotor(uint8_t wheelId);
+    bool disableDriveMotor(uint8_t wheelId);
     
-    // Odometry
-    int32_t getEncoderCount(uint8_t encoderId);
-    void resetEncoder(uint8_t encoderId);
+    // Steer motor control
+    bool setSteerAngle(uint8_t wheelId, float angle);
+    bool setSteerSpeed(uint8_t wheelId, int16_t speed);
+    bool enableSteerMotor(uint8_t wheelId);
+    bool disableSteerMotor(uint8_t wheelId);
     
-    // Movement commands
+    // Encoder feedback
+    int32_t getDriveEncoderCount(uint8_t wheelId);
+    int32_t getSteerEncoderCount(uint8_t wheelId);
+    void resetDriveEncoder(uint8_t wheelId);
+    void resetSteerEncoder(uint8_t wheelId);
+    
+    // High-level movement commands
     bool moveForward(uint16_t distance);
-    bool turn(int16_t angle);
+    bool moveBackward(uint16_t distance);
+    bool turnInPlace(int16_t angle);
+    bool steerToAngle(float frontAngle, float rearAngle);
+    bool crabWalk(uint8_t direction, uint16_t distance);
     bool stop();
+    
+    // Wheel definitions
+    enum WheelID {
+        WHEEL_LEFT_FRONT = 0,
+        WHEEL_RIGHT_FRONT = 1,
+        WHEEL_LEFT_REAR = 2,
+        WHEEL_RIGHT_REAR = 3
+    };
 };
 ```
 

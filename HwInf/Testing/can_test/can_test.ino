@@ -2,7 +2,7 @@
  * CAN Bus Communication Test for Teensy 4.1
  * 
  * Hardware Setup:
- * - TJA1050 CAN Transceiver connected to Teensy 4.1
+ * - TJA1050 CAN Transceiver connected to Teensy 4.1 (HAT Module)
  * - TXD (TJA1050) -> Pin 22 (CAN1_TX)
  * - RXD (TJA1050) -> Pin 23 (CAN1_RX)
  * - VCC (TJA1050) -> 5V

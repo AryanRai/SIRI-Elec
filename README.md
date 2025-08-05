@@ -14,8 +14,8 @@ graph TB
     subgraph "SIRI Rover Electrical System"
         subgraph "Backplane"
             Jetson[Jetson Orin Nano<br/>Main Compute]
-            CAN1[CAN Transceiver 1<br/>TJA1050]
-            CAN2[CAN Transceiver 2<br/>TJA1050 - Redundant]
+            CAN1[CAN Transceiver 1<br/>SN65HVD230]
+            CAN2[CAN Transceiver 2<br/>SN65HVD230 - Redundant]
             Power[Power Distribution]
             
             Jetson --- CAN1
@@ -31,13 +31,17 @@ graph TB
             subgraph "DriveHat - Priority 2"
                 D_MCU[Microcontroller]
                 D_CAN[TJA1050]
-                D_Motors[Motor Controllers<br/>0x210-0x213]
-                D_Encoders[Encoders<br/>0x220-0x223]
+                D_Drive[Drive Motors<br/>0x210-0x213]
+                D_Steer[Steer Motors<br/>0x214-0x217]
+                D_DriveEnc[Drive Encoders<br/>0x220-0x223]
+                D_SteerEnc[Steer Encoders<br/>0x224-0x227]
                 D_IMU[IMU/Odometry<br/>0x230-0x23F]
                 
                 D_MCU --- D_CAN
-                D_MCU --- D_Motors
-                D_MCU --- D_Encoders
+                D_MCU --- D_Drive
+                D_MCU --- D_Steer
+                D_MCU --- D_DriveEnc
+                D_MCU --- D_SteerEnc
                 D_MCU --- D_IMU
             end
             
@@ -130,62 +134,46 @@ The core of SIRI-Elec is a **Common Hardware Interface** that standardizes commu
 ### Physical Architecture
 
 ```mermaid
-graph LR
+graph TB
     subgraph "Backplane PCB"
-        subgraph "Compute Section"
-            Jetson[Jetson Orin Nano<br/>ARM Cortex-A78AE<br/>2048 CUDA Cores]
-            Memory[8GB LPDDR5<br/>128GB eUFS]
+        subgraph "Compute & Power"
+            Jetson[Jetson Orin Nano<br/>ARM Cortex-A78AE]
+            PowerDist[Power Distribution<br/>5V/3.3V Rails]
         end
         
-        subgraph "CAN Interface"
-            CAN_Primary[Primary CAN<br/>TJA1050]
-            CAN_Backup[Backup CAN<br/>TJA1050]
-            CAN_Term[120Ω Termination]
+        subgraph "Communication"
+            CAN_Primary[Primary CAN<br/>SN65HVD230]
+            CAN_Backup[Backup CAN<br/>SN65HVD230]
         end
         
         subgraph "HAT Connectors"
-            Slot1[HAT Slot 1<br/>40-pin GPIO]
-            Slot2[HAT Slot 2<br/>40-pin GPIO]
-            Slot3[HAT Slot 3<br/>40-pin GPIO]
-            Slot4[HAT Slot 4<br/>40-pin GPIO]
-            Slot5[HAT Slot 5<br/>40-pin GPIO]
-            Slot6[HAT Slot 6<br/>40-pin GPIO]
-        end
-        
-        subgraph "Power Management"
-            PowerReg[5V/3.3V Regulators]
-            PowerDist[Power Distribution]
-            PowerMon[Power Monitoring]
+            Slot1[Slot 1<br/>40-pin]
+            Slot2[Slot 2<br/>40-pin]
+            Slot3[Slot 3<br/>40-pin]
+            Slot4[Slot 4<br/>40-pin]
+            Slot5[Slot 5<br/>40-pin]
+            Slot6[Slot 6<br/>40-pin]
         end
     end
     
-    subgraph "HAT Cards (Pluggable)"
-        DriveCard[DriveHat<br/>━━━━━━━━━━<br/>Motor Controllers<br/>Encoder Interfaces<br/>IMU Module]
-        
-        ArmCard[ArmHat<br/>━━━━━━━━━━<br/>Servo Controllers<br/>Position Feedback<br/>Force Sensors]
-        
-        BPSCard[BPS Hat<br/>━━━━━━━━━━<br/>Battery Monitor<br/>Current Sensing<br/>Emergency Stop]
-        
-        SenseCard[SenseHat<br/>━━━━━━━━━━<br/>Environmental<br/>IMU/GPS<br/>Temperature]
-        
-        SciCard[SciHat<br/>━━━━━━━━━━<br/>Sample Collection<br/>Spectrometer<br/>Camera Interface]
-        
-        TemplateCard[TemplateHat<br/>━━━━━━━━━━<br/>Base Template<br/>CAN Interface<br/>State Machine]
+    subgraph "HAT Modules"
+        DriveCard[DriveHat<br/>Drive & Steer Control]
+        ArmCard[ArmHat<br/>Servo Control]
+        BPSCard[BPS Hat<br/>Battery Monitor]
+        SenseCard[SenseHat<br/>Environmental]
+        SciCard[SciHat<br/>Science Payload]
+        TemplateCard[TemplateHat<br/>Base Template]
     end
     
-    Slot1 ---|40-pin| DriveCard
-    Slot2 ---|40-pin| ArmCard
-    Slot3 ---|40-pin| BPSCard
-    Slot4 ---|40-pin| SenseCard
-    Slot5 ---|40-pin| SciCard
-    Slot6 ---|40-pin| TemplateCard
+    Jetson --- CAN_Primary
+    Jetson --- CAN_Backup
     
-    CAN_Primary --- Slot1
-    CAN_Primary --- Slot2
-    CAN_Primary --- Slot3
-    CAN_Primary --- Slot4
-    CAN_Primary --- Slot5
-    CAN_Primary --- Slot6
+    Slot1 --- DriveCard
+    Slot2 --- ArmCard
+    Slot3 --- BPSCard
+    Slot4 --- SenseCard
+    Slot5 --- SciCard
+    Slot6 --- TemplateCard
     
     PowerDist --- Slot1
     PowerDist --- Slot2
@@ -193,24 +181,31 @@ graph LR
     PowerDist --- Slot4
     PowerDist --- Slot5
     PowerDist --- Slot6
+    
+    CAN_Primary --- Slot1
+    CAN_Primary --- Slot2
+    CAN_Primary --- Slot3
+    CAN_Primary --- Slot4
+    CAN_Primary --- Slot5
+    CAN_Primary --- Slot6
 ```
 
 ### Key Components
 
 #### Backplane
 - **Central compute node**: Jetson Orin Nano with ARM Cortex-A78AE
-- **Dual CAN transceivers**: TJA1050 with redundancy for fault tolerance
+- **Dual CAN transceivers**: SN65HVD230 (3.3V compatible) with redundancy for fault tolerance
 - **Multiple HAT slots**: 6x 40-pin GPIO connectors for expansion
 - **Power distribution**: Regulated 5V/3.3V supply to all HATs
 - **Broadcast communication**: Priority-based CAN arbitration
 
 #### HAT Modules
 - **TemplateHAT**: Base template for creating new HAT modules
-- **ArmHAT**: Robotic arm control and actuation
-- **DriveHat**: Motor control and odometry
-- **BPS**: Battery protection and power management
-- **SciHat**: Scientific payload control
-- **SenseHat**: Environmental and onboard sensing
+- **ArmHAT**: Robotic arm control and actuation (Teensy + TJA1050)
+- **DriveHat**: 4-wheel independent drive and steer control with encoders (Teensy + TJA1050)
+- **BPS**: Battery protection and power management (Teensy + TJA1050)
+- **SciHat**: Scientific payload control (Teensy + TJA1050)
+- **SenseHat**: Environmental and onboard sensing (Teensy + TJA1050)
 
 ### Modular Design Benefits
 - **Hot-swappable**: HATs can be replaced without system shutdown
@@ -229,7 +224,7 @@ graph LR
 
 ### Priority System
 1. **Jetson** (Priority 1) - Main compute and coordination
-2. **DriveHat** (Priority 2) - Low-latency motor control
+2. **DriveHat** (Priority 2) - Low-latency drive and steer motor control
 3. **BPS** (Priority 3) - Critical battery monitoring
 4. **ArmHat** (Priority 4) - Robotic arm control
 5. **SciHat** (Priority 5) - Scientific operations
