@@ -119,7 +119,28 @@ State Machine Base: HAT_BASE_ADDRESS + 0xF0
 
 ### State-Specific Component Access
 
-#### LOCKED State (Default after boot)
+#### DISARMED State (Initial boot state)
+```
+Accessible Components:
+- Heartbeat: All HATs
+- Basic Telemetry: All HATs
+- Status Queries: All HATs
+- All sensors and monitoring
+- Configuration interfaces
+- Diagnostic functions
+Blocked Components:
+- Motor controllers
+- Actuator commands
+- Movement operations
+- Mission commands
+
+Communication:
+- Expects periodic pings from Jetson
+- Auto-transitions to LOCKED (default state)
+- Maintains CAN interface for configuration
+```
+
+#### LOCKED State (Default operational state)
 ```
 Accessible Components:
 - Heartbeat: All HATs
@@ -138,27 +159,6 @@ Communication:
 - Expects periodic pings from Jetson
 - Auto-timeout to LOCKED if no messages received
 - Maintains CAN interface for emergency only
-```
-
-#### DISARMED State (Intermediate state)
-```
-Accessible Components:
-- Heartbeat: All HATs
-- Basic Telemetry: All HATs
-- Status Queries: All HATs
-- All sensors and monitoring
-- Configuration interfaces
-- Diagnostic functions
-Blocked Components:
-- Motor controllers
-- Actuator commands
-- Movement operations
-- Mission commands
-
-Communication:
-- Expects periodic pings from Jetson
-- Auto-timeout to LOCKED if no messages received
-- Maintains CAN interface for configuration
 ```
 
 #### UNLOCKED State (Ready for activation)

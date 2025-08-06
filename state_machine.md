@@ -10,21 +10,19 @@ All HATs in the SIRI-Elec system implement a standardized state machine for powe
 stateDiagram-v2
     [*] --> POWER_OFF
     
-    POWER_OFF --> LOCKED : Power On / System Boot
+    POWER_OFF --> DISARMED : Power On / System Boot
     
-    LOCKED --> DISARMED : Unlock Command
+    DISARMED --> LOCKED : Default Transition / Timeout
+    
+    LOCKED --> UNLOCKED : Unlock Command
     LOCKED --> EMERGENCY_STOP : Emergency Trigger
     
-    DISARMED --> LOCKED : Lock Command / Timeout
-    DISARMED --> UNLOCKED : Base Station Command
-    
     UNLOCKED --> POWER_ARMED : Operator Command (R2 Button)
-    UNLOCKED --> DISARMED : Timeout / Safety Command
-    UNLOCKED --> LOCKED : Lock Command
+    UNLOCKED --> LOCKED : Timeout / Safety Command
     
     POWER_ARMED --> UNLOCKED : Release Command
     POWER_ARMED --> EMERGENCY_STOP : Emergency Trigger
-    POWER_ARMED --> DISARMED : Mission Complete / Timeout
+    POWER_ARMED --> LOCKED : Mission Complete / Timeout
     
     EMERGENCY_STOP --> LOCKED : System Reset
     EMERGENCY_STOP --> POWER_OFF : Critical Shutdown
@@ -35,12 +33,11 @@ stateDiagram-v2
     end note
     
     note right of DISARMED
-        Default state after boot
-        Periodic pings from Jetson
-        Motors/actuators locked
+        Initial state after boot
+        Brief transition state
+        Auto-transitions to LOCKED
         Sensors active
-        Auto-timeout to DISARMED
-        if no Jetson messages
+        Configuration accessible
     end note
     
     note right of UNLOCKED
@@ -58,10 +55,11 @@ stateDiagram-v2
     end note
     
     note right of LOCKED
-        Safety lock engaged
-        All commands blocked
+        Default operational state
+        All commands blocked except unlock
         Motors mechanically locked
         Emergency protocols active
+        Periodic pings from Jetson
     end note
     
     note right of EMERGENCY_STOP
@@ -83,21 +81,8 @@ stateDiagram-v2
 - **Entry Conditions**: System shutdown, power loss
 - **Exit Conditions**: Power button pressed, external power applied
 
-### LOCKED
-- **Description**: Default secure state after system boot
-- **Characteristics**:
-  - All electrical systems powered
-  - CAN interface active
-  - All commands blocked except unlock
-  - Motors/actuators mechanically/electrically locked
-  - Sensors operational for monitoring
-  - Emergency protocols active
-  - Requires explicit unlock command
-- **Entry Conditions**: System boot, timeout from any state, safety commands, lock commands
-- **Exit Conditions**: Authorized unlock command
-
 ### DISARMED
-- **Description**: Intermediate state between locked and unlocked
+- **Description**: Initial state after system boot, transitions to locked
 - **Characteristics**:
   - All electrical systems powered
   - CAN interface active
@@ -106,9 +91,22 @@ stateDiagram-v2
   - Sensors fully operational
   - Configuration commands accepted
   - Movement commands ignored
-  - Auto-timeout to LOCKED if no Jetson messages received
-- **Entry Conditions**: Unlock command from locked state, timeout from other states, mission completion
-- **Exit Conditions**: Base station unlock command to unlocked, timeout to locked
+  - Auto-transitions to LOCKED as default state
+- **Entry Conditions**: System boot, power on
+- **Exit Conditions**: Automatic transition to locked (default state)
+
+### LOCKED
+- **Description**: Default secure operational state
+- **Characteristics**:
+  - All electrical systems powered
+  - CAN interface active
+  - All commands blocked except unlock
+  - Motors/actuators mechanically/electrically locked
+  - Sensors operational for monitoring
+  - Emergency protocols active
+  - Requires explicit unlock command
+- **Entry Conditions**: Default from disarmed, timeout from any state, safety commands, lock commands
+- **Exit Conditions**: Authorized unlock command
 
 ### UNLOCKED
 - **Description**: Ready for activation, awaiting operator command
@@ -148,19 +146,19 @@ stateDiagram-v2
 ### Command-Based Transitions
 | From State | Command | To State | Authority |
 |------------|---------|----------|-----------|
-| LOCKED | UNLOCK | DISARMED | Base Station |
-| DISARMED | UNLOCK | UNLOCKED | Base Station |
-| DISARMED | LOCK | LOCKED | Base Station/Timeout |
+| DISARMED | AUTO | LOCKED | System (Default) |
+| LOCKED | UNLOCK | UNLOCKED | Base Station |
 | UNLOCKED | ARM | POWER_ARMED | Operator (R2) |
-| UNLOCKED | DISARM | DISARMED | Base Station |
 | UNLOCKED | LOCK | LOCKED | Base Station |
 | POWER_ARMED | DISARM | UNLOCKED | Operator |
+| POWER_ARMED | LOCK | LOCKED | Base Station |
 | Any State | EMERGENCY | EMERGENCY_STOP | Any Source |
 
 ### Automatic Transitions
+- **Boot Sequence**: DISARMED → LOCKED (automatic default transition)
 - **Jetson Ping Timeout**: Any State → LOCKED (when periodic pings from Jetson stop)
-- **Safety Timeout**: DISARMED → LOCKED (after 5 minutes of inactivity)
-- **Mission Complete**: POWER_ARMED → DISARMED (task completion)
+- **Safety Timeout**: UNLOCKED → LOCKED (after 2 minutes of inactivity)
+- **Mission Complete**: POWER_ARMED → LOCKED (task completion)
 - **Communication Loss**: Any Active State → LOCKED (after timeout period)
 - **Power Loss**: Any State → POWER_OFF (immediate)
 
@@ -169,11 +167,11 @@ stateDiagram-v2
 ### Scenario: Descend down egress ramp on the Lander
 
 #### Pre-Mission Setup
-1. **POWER_OFF → LOCKED**
+1. **POWER_OFF → DISARMED → LOCKED**
    - Operator presses power button on rover
    - All hardware electrical systems receive power
    - Jetson boots and initializes
-   - All HATs enter LOCKED state (default secure state)
+   - All HATs enter DISARMED state briefly, then automatically transition to LOCKED (default secure state)
    - Radio communications established
    - Jetson begins periodic ping transmission to HATs
 
@@ -185,21 +183,16 @@ stateDiagram-v2
    - HATs remain in LOCKED, receiving Jetson pings
 
 #### Mission Activation Sequence
-3. **LOCKED → DISARMED**
-   - Base station operator sends first unlock command
-   - HATs transition from secure locked state to disarmed
-   - Basic systems become accessible
-   - Jetson continues periodic pings
-
-4. **DISARMED → UNLOCKED**
-   - Base station operator sends second unlock command
+3. **LOCKED → UNLOCKED**
+   - Base station operator sends unlock command
+   - HATs transition from secure locked state to unlocked
    - DriveHat: Motors unlocked, ready for commands
    - SenseHat: Cameras and sensors active
    - ArmHat: Remains in safe position
    - SciHat: Payload systems ready but inactive
    - Jetson continues periodic pings
 
-5. **UNLOCKED → POWER_ARMED**
+4. **UNLOCKED → POWER_ARMED**
    - Operator turns on joystick
    - Operator presses R2 button (ARM command)
    - DriveHat: Fully operational, accepting movement commands
@@ -241,12 +234,11 @@ stateDiagram-v2
 ```cpp
 typedef enum {
     STATE_POWER_OFF = 0,
-    STATE_POWER_IDLE = 1,
-    STATE_DISARMED = 2,
+    STATE_DISARMED = 1,      // Initial state after boot
+    STATE_LOCKED = 2,        // Default operational state
     STATE_UNLOCKED = 3,
     STATE_POWER_ARMED = 4,
-    STATE_LOCKED = 5,
-    STATE_EMERGENCY_STOP = 6
+    STATE_EMERGENCY_STOP = 5
 } HAT_State_t;
 ```
 
@@ -266,8 +258,8 @@ public:
 ## Safety Features
 
 ### Timeout Protection
-- **DISARMED Timeout**: 5 minutes → LOCKED
-- **UNLOCKED Timeout**: 2 minutes → DISARMED
+- **Boot Timeout**: DISARMED → LOCKED (automatic, immediate)
+- **UNLOCKED Timeout**: 2 minutes → LOCKED
 - **Communication Timeout**: 10 seconds → LOCKED
 - **Heartbeat Timeout**: 5 seconds → EMERGENCY_STOP
 

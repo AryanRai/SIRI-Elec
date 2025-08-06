@@ -280,29 +280,28 @@ stateDiagram-v2
         AllHATsOff : No power consumption
     }
     
-    SystemOff --> SystemLocked : Power Button
+    SystemOff --> SystemDisarmed : Power Button
+    
+    state SystemDisarmed {
+        [*] --> JetsonBoot
+        JetsonBoot --> HATsDisarmed : Boot Complete
+        HATsDisarmed : All HATs in DISARMED (brief)
+        HATsDisarmed : Periodic Jetson pings
+        HATsDisarmed : Hardware disabled
+        HATsDisarmed : Auto-transition to LOCKED
+    }
+    
+    SystemDisarmed --> SystemLocked : Auto Transition
     
     state SystemLocked {
-        [*] --> JetsonBoot
-        JetsonBoot --> HATsLocked : Boot Complete
+        [*] --> HATsLocked
         HATsLocked : All HATs in LOCKED (default)
         HATsLocked : Periodic Jetson pings
         HATsLocked : Hardware locked
         HATsLocked : All commands blocked
     }
     
-    SystemLocked --> SystemDisarmed : Base Station Unlock
-    
-    state SystemDisarmed {
-        [*] --> HATsDisarmed
-        HATsDisarmed : All HATs in DISARMED
-        HATsDisarmed : Periodic Jetson pings
-        HATsDisarmed : Hardware disabled
-        HATsDisarmed : Auto-timeout to LOCKED
-    }
-    
-    SystemDisarmed --> SystemReady : Base Station Unlock
-    SystemDisarmed --> SystemLocked : Timeout/Lock Command
+    SystemLocked --> SystemReady : Base Station Unlock
     
     state SystemReady {
         [*] --> HATsUnlocked
@@ -323,10 +322,9 @@ stateDiagram-v2
     }
     
     SystemArmed --> SystemReady : Operator Release
-    SystemReady --> SystemDisarmed : Base Station Command
+    SystemReady --> SystemLocked : Timeout/Lock Command
     SystemArmed --> EmergencyState : Emergency Trigger
     SystemReady --> EmergencyState : Emergency Trigger
-    SystemDisarmed --> EmergencyState : Emergency Trigger
     SystemLocked --> EmergencyState : Emergency Trigger
     
     state EmergencyState {

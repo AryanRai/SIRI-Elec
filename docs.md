@@ -309,8 +309,8 @@ struct TelemetryMessage {
 ```cpp
 typedef enum {
     STATE_POWER_OFF = 0,
-    STATE_LOCKED = 1,        // Default state after boot
-    STATE_DISARMED = 2,
+    STATE_DISARMED = 1,      // Initial state after boot
+    STATE_LOCKED = 2,        // Default operational state
     STATE_UNLOCKED = 3,
     STATE_POWER_ARMED = 4,
     STATE_EMERGENCY_STOP = 5
@@ -351,8 +351,8 @@ public:
 ```cpp
 // Commands allowed in each state (bitmask)
 #define POWER_OFF_ALLOWED       0x00000000
+#define DISARMED_ALLOWED        0x00000003  // Config + Status (initial state)
 #define LOCKED_ALLOWED          0x00000001  // Heartbeat only (default state)
-#define DISARMED_ALLOWED        0x00000003  // Config + Status
 #define UNLOCKED_ALLOWED        0x00000007  // + Limited control
 #define POWER_ARMED_ALLOWED     0xFFFFFFFF  // All commands
 #define EMERGENCY_ALLOWED       0x00000001  // Heartbeat only
