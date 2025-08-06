@@ -5,6 +5,7 @@ Electrical systems for SIRI rover - A modular hardware interface framework
 
 SIRI-Elec provides a comprehensive hardware interface system for the SIRI rover, built around a high-speed CAN network backbone that connects all rover subsystems. The system uses a modular HAT-based architecture for scalability and maintainability.
 
+hahahahha
 ## Architecture
 
 ### System Overview Diagram
