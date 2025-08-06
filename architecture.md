@@ -280,17 +280,18 @@ stateDiagram-v2
         AllHATsOff : No power consumption
     }
     
-    SystemOff --> SystemIdle : Power Button
+    SystemOff --> SystemDisarmed : Power Button
     
-    state SystemIdle {
+    state SystemDisarmed {
         [*] --> JetsonBoot
-        JetsonBoot --> HATsIdle : Boot Complete
-        HATsIdle : All HATs in POWER_IDLE
-        HATsIdle : Heartbeat active
-        HATsIdle : Commands ignored
+        JetsonBoot --> HATsDisarmed : Boot Complete
+        HATsDisarmed : All HATs in DISARMED
+        HATsDisarmed : Periodic Jetson pings
+        HATsDisarmed : Hardware locked
+        HATsDisarmed : Auto-timeout to DISARMED
     }
     
-    SystemIdle --> SystemReady : Base Station Unlock
+    SystemDisarmed --> SystemReady : Base Station Unlock
     
     state SystemReady {
         [*] --> HATsUnlocked
@@ -311,10 +312,10 @@ stateDiagram-v2
     }
     
     SystemArmed --> SystemReady : Operator Release
-    SystemReady --> SystemIdle : Base Station Command
+    SystemReady --> SystemDisarmed : Base Station Command
     SystemArmed --> EmergencyState : Emergency Trigger
     SystemReady --> EmergencyState : Emergency Trigger
-    SystemIdle --> EmergencyState : Emergency Trigger
+    SystemDisarmed --> EmergencyState : Emergency Trigger
     
     state EmergencyState {
         [*] --> AllHATsEmergency
@@ -324,7 +325,7 @@ stateDiagram-v2
         AllHATsEmergency : Manual reset required
     }
     
-    EmergencyState --> SystemIdle : Manual Reset
+    EmergencyState --> SystemDisarmed : Manual Reset
     EmergencyState --> SystemOff : Critical Shutdown
 ```
 

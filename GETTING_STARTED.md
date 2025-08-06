@@ -273,10 +273,11 @@ Version: 1.0.0
 Node ID: 0x7
 ERROR: CAN interface initialization failed
 ERROR: State machine initialization failed
+State: DISARMED (waiting for Jetson pings)
 === Initialization Complete ===
 ```
 
-*Note: Errors are expected without CAN hardware connected*
+*Note: Errors are expected without CAN hardware connected. HAT enters DISARMED state by default.*
 
 ## 🎯 Development Workflow
 
@@ -330,10 +331,10 @@ Serial.println(sensorValue);
 ### LED Status Indicators
 ```cpp
 // Status LED patterns (built into template)
-// Slow blink: POWER_IDLE
-// Fast blink: DISARMED  
-// Double blink: UNLOCKED
+// Slow blink: DISARMED (default state, waiting for Jetson pings)
+// Fast blink: UNLOCKED  
 // Solid: POWER_ARMED
+// Off + Error LED: LOCKED
 // Rapid flash: EMERGENCY_STOP
 ```
 
