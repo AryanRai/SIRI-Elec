@@ -217,10 +217,10 @@ sequenceDiagram
     J->>B: Heartbeat Request
     J->>S: Heartbeat Request
     
-    D-->>J: Heartbeat Response (STATE_POWER_IDLE)
-    A-->>J: Heartbeat Response (STATE_POWER_IDLE)
-    B-->>J: Heartbeat Response (STATE_POWER_IDLE)
-    S-->>J: Heartbeat Response (STATE_POWER_IDLE)
+    D-->>J: Heartbeat Response (STATE_LOCKED)
+    A-->>J: Heartbeat Response (STATE_LOCKED)
+    B-->>J: Heartbeat Response (STATE_LOCKED)
+    S-->>J: Heartbeat Response (STATE_LOCKED)
     
     Note over BS,S: Mission Activation
     BS->>J: Launch ROS2 Command
@@ -280,18 +280,29 @@ stateDiagram-v2
         AllHATsOff : No power consumption
     }
     
-    SystemOff --> SystemDisarmed : Power Button
+    SystemOff --> SystemLocked : Power Button
+    
+    state SystemLocked {
+        [*] --> JetsonBoot
+        JetsonBoot --> HATsLocked : Boot Complete
+        HATsLocked : All HATs in LOCKED (default)
+        HATsLocked : Periodic Jetson pings
+        HATsLocked : Hardware locked
+        HATsLocked : All commands blocked
+    }
+    
+    SystemLocked --> SystemDisarmed : Base Station Unlock
     
     state SystemDisarmed {
-        [*] --> JetsonBoot
-        JetsonBoot --> HATsDisarmed : Boot Complete
+        [*] --> HATsDisarmed
         HATsDisarmed : All HATs in DISARMED
         HATsDisarmed : Periodic Jetson pings
-        HATsDisarmed : Hardware locked
-        HATsDisarmed : Auto-timeout to DISARMED
+        HATsDisarmed : Hardware disabled
+        HATsDisarmed : Auto-timeout to LOCKED
     }
     
     SystemDisarmed --> SystemReady : Base Station Unlock
+    SystemDisarmed --> SystemLocked : Timeout/Lock Command
     
     state SystemReady {
         [*] --> HATsUnlocked
@@ -316,6 +327,7 @@ stateDiagram-v2
     SystemArmed --> EmergencyState : Emergency Trigger
     SystemReady --> EmergencyState : Emergency Trigger
     SystemDisarmed --> EmergencyState : Emergency Trigger
+    SystemLocked --> EmergencyState : Emergency Trigger
     
     state EmergencyState {
         [*] --> AllHATsEmergency
@@ -325,7 +337,7 @@ stateDiagram-v2
         AllHATsEmergency : Manual reset required
     }
     
-    EmergencyState --> SystemDisarmed : Manual Reset
+    EmergencyState --> SystemLocked : Manual Reset
     EmergencyState --> SystemOff : Critical Shutdown
 ```
 

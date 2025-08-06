@@ -298,22 +298,22 @@ All HATs implement a standardized state machine for safety and operational contr
 ```mermaid
 stateDiagram-v2
     [*] --> POWER_OFF
-    POWER_OFF --> DISARMED : Power On
+    POWER_OFF --> LOCKED : Power On
+    LOCKED --> DISARMED : Unlock Command
     DISARMED --> UNLOCKED : Base Station Command
     DISARMED --> LOCKED : Timeout/Safety
     UNLOCKED --> POWER_ARMED : Operator Command (R2)
     POWER_ARMED --> UNLOCKED : Release Command
-    LOCKED --> DISARMED : Unlock Command
     POWER_ARMED --> EMERGENCY_STOP : Emergency
-    EMERGENCY_STOP --> DISARMED : Reset
+    EMERGENCY_STOP --> LOCKED : Reset
 ```
 
 ### State Definitions
 - **POWER_OFF**: System completely powered down
-- **DISARMED**: Default state after boot, periodic Jetson pings expected, hardware locked
+- **LOCKED**: Default secure state after boot, all commands blocked except unlock
+- **DISARMED**: Intermediate state, periodic Jetson pings expected, hardware disabled
 - **UNLOCKED**: Ready for activation, motors unlocked, awaiting arm command
 - **POWER_ARMED**: Fully operational mission state, all commands accepted
-- **LOCKED**: Safety lock engaged, all commands blocked
 - **EMERGENCY_STOP**: Emergency halt, requires manual reset
 
 ## Features
