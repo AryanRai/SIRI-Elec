@@ -322,7 +322,10 @@ stateDiagram-v2
     }
     
     SystemArmed --> SystemReady : Operator Release
-    SystemReady --> SystemLocked : Timeout/Lock Command
+    SystemReady --> SystemLocked : Safety Command
+    SystemReady --> SystemDisarmed : Jetson Ping Timeout
+    SystemArmed --> SystemDisarmed : Jetson Ping Timeout
+    SystemLocked --> SystemDisarmed : Jetson Ping Timeout
     SystemArmed --> EmergencyState : Emergency Trigger
     SystemReady --> EmergencyState : Emergency Trigger
     SystemLocked --> EmergencyState : Emergency Trigger

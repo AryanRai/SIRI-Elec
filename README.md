@@ -302,7 +302,10 @@ stateDiagram-v2
     DISARMED --> LOCKED : Auto Transition (Default)
     LOCKED --> UNLOCKED : Unlock Command
     UNLOCKED --> POWER_ARMED : Operator Command (R2)
-    UNLOCKED --> LOCKED : Timeout/Safety
+    UNLOCKED --> LOCKED : Safety Command
+    UNLOCKED --> DISARMED : Jetson Ping Timeout
+    POWER_ARMED --> DISARMED : Jetson Ping Timeout
+    LOCKED --> DISARMED : Jetson Ping Timeout
     POWER_ARMED --> UNLOCKED : Release Command
     POWER_ARMED --> EMERGENCY_STOP : Emergency
     EMERGENCY_STOP --> LOCKED : Reset

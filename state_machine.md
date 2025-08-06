@@ -16,13 +16,15 @@ stateDiagram-v2
     
     LOCKED --> UNLOCKED : Unlock Command
     LOCKED --> EMERGENCY_STOP : Emergency Trigger
+    LOCKED --> DISARMED : Jetson Ping Timeout
     
     UNLOCKED --> POWER_ARMED : Operator Command (R2 Button)
-    UNLOCKED --> LOCKED : Timeout / Safety Command
+    UNLOCKED --> LOCKED : Safety Command
+    UNLOCKED --> DISARMED : Jetson Ping Timeout
     
     POWER_ARMED --> UNLOCKED : Release Command
     POWER_ARMED --> EMERGENCY_STOP : Emergency Trigger
-    POWER_ARMED --> LOCKED : Mission Complete / Timeout
+    POWER_ARMED --> DISARMED : Mission Complete / Jetson Ping Timeout
     
     EMERGENCY_STOP --> LOCKED : System Reset
     EMERGENCY_STOP --> POWER_OFF : Critical Shutdown
@@ -149,17 +151,16 @@ stateDiagram-v2
 | DISARMED | AUTO | LOCKED | System (Default) |
 | LOCKED | UNLOCK | UNLOCKED | Base Station |
 | UNLOCKED | ARM | POWER_ARMED | Operator (R2) |
-| UNLOCKED | LOCK | LOCKED | Base Station |
+| UNLOCKED | LOCK | LOCKED | Base Station (Safety) |
 | POWER_ARMED | DISARM | UNLOCKED | Operator |
-| POWER_ARMED | LOCK | LOCKED | Base Station |
+| Any State | JETSON_PING_TIMEOUT | DISARMED | System |
 | Any State | EMERGENCY | EMERGENCY_STOP | Any Source |
 
 ### Automatic Transitions
 - **Boot Sequence**: DISARMED → LOCKED (automatic default transition)
-- **Jetson Ping Timeout**: Any State → LOCKED (when periodic pings from Jetson stop)
-- **Safety Timeout**: UNLOCKED → LOCKED (after 2 minutes of inactivity)
-- **Mission Complete**: POWER_ARMED → LOCKED (task completion)
-- **Communication Loss**: Any Active State → LOCKED (after timeout period)
+- **Jetson Ping Timeout**: Any State → DISARMED (when periodic pings from Jetson stop), then DISARMED → LOCKED
+- **Mission Complete**: POWER_ARMED → DISARMED (task completion), then DISARMED → LOCKED
+- **Communication Loss**: Any Active State → DISARMED (after timeout period), then DISARMED → LOCKED
 - **Power Loss**: Any State → POWER_OFF (immediate)
 
 ## Mission Use Case: Lander Egress
@@ -210,10 +211,10 @@ stateDiagram-v2
 
 #### Safety Considerations
 - **Emergency Stop**: Any critical condition triggers EMERGENCY_STOP
-- **Communication Loss**: Timeout from missing Jetson pings triggers automatic return to LOCKED state
+- **Communication Loss**: Timeout from missing Jetson pings triggers automatic return to DISARMED state, which then auto-transitions to LOCKED
 - **Battery Critical**: BPS triggers emergency protocols
 - **Operator Override**: R2 release returns to UNLOCKED state
-- **Automatic Timeout**: All states (except POWER_OFF) timeout to LOCKED if Jetson pings stop
+- **Automatic Timeout**: All states (except POWER_OFF) timeout to DISARMED if Jetson pings stop, then DISARMED auto-transitions to LOCKED
 
 ## Implementation Requirements
 
@@ -259,9 +260,10 @@ public:
 
 ### Timeout Protection
 - **Boot Timeout**: DISARMED → LOCKED (automatic, immediate)
-- **UNLOCKED Timeout**: 2 minutes → LOCKED
-- **Communication Timeout**: 10 seconds → LOCKED
+- **Jetson Ping Timeout**: Any State → DISARMED (when periodic pings stop), then DISARMED → LOCKED
+- **Communication Timeout**: 10 seconds → DISARMED, then DISARMED → LOCKED
 - **Heartbeat Timeout**: 5 seconds → EMERGENCY_STOP
+- **No timeout between LOCKED and UNLOCKED**: States remain stable unless explicitly commanded or Jetson pings stop
 
 ### Authority Levels
 - **Base Station**: Can unlock, disarm, lock, reset

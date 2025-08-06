@@ -157,7 +157,7 @@ Blocked Components:
 
 Communication:
 - Expects periodic pings from Jetson
-- Auto-timeout to LOCKED if no messages received
+- Auto-timeout to DISARMED if no messages received (then DISARMED → LOCKED)
 - Maintains CAN interface for emergency only
 ```
 
