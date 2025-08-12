@@ -10,13 +10,13 @@ The SIRI-Elec system implements a modular, distributed architecture centered aro
 
 **CAN Transceiver Selection:**
 - **Jetson Backplane**: SN65HVD230 (3.3V compatible with Jetson GPIO)
-- **HAT Modules (Teensy)**: TJA1050 (5V tolerant, robust for distributed modules)
+- **HAT Modules (Teensy)**: SN65HVD230 (3.3V compatible with Teensy 4.1 GPIO)
 
 ```mermaid
 graph TB
     subgraph "Backplane PCB Layout"
         subgraph "Top Section - Compute"
-            Jetson[Jetson Orin Nano<br/>40-pin GPIO Header<br/>USB-C Power<br/>Ethernet/WiFi]
+            Jetson[Jetson Orin Nano<br/>VGA GPIO Header<br/>USB-C Power<br/>Ethernet/WiFi]
             SODIMM[SO-DIMM Connector<br/>8GB LPDDR5]
             eMMC[eUFS Storage<br/>128GB]
         end
@@ -29,12 +29,12 @@ graph TB
         end
         
         subgraph "Bottom Section - HAT Interfaces"
-            HAT1[HAT Slot 1<br/>40-pin Female<br/>DriveHat]
-            HAT2[HAT Slot 2<br/>40-pin Female<br/>ArmHat]
-            HAT3[HAT Slot 3<br/>40-pin Female<br/>BPS]
-            HAT4[HAT Slot 4<br/>40-pin Female<br/>SenseHat]
-            HAT5[HAT Slot 5<br/>40-pin Female<br/>SciHat]
-            HAT6[HAT Slot 6<br/>40-pin Female<br/>Expansion]
+            HAT1[HAT Slot 1<br/>VGA Female<br/>DriveHat]
+            HAT2[HAT Slot 2<br/>VGA Female<br/>ArmHat]
+            HAT3[HAT Slot 3<br/>VGA Female<br/>BPS]
+            HAT4[HAT Slot 4<br/>VGA Female<br/>SenseHat]
+            HAT5[HAT Slot 5<br/>VGA Female<br/>SciHat]
+            HAT6[HAT Slot 6<br/>VGA Female<br/>Expansion]
         end
         
         subgraph "Power Section"
@@ -77,9 +77,9 @@ graph TB
 graph LR
     subgraph "Generic HAT PCB"
         subgraph "Interface Section"
-            Connector[40-pin Male Header<br/>GPIO/Power/CAN]
+            Connector[VGA Male Header<br/>GPIO/Power/CAN]
             MCU[Microcontroller<br/>STM32/ESP32]
-            CAN_Trans[TJA1050<br/>CAN Transceiver]
+            CAN_Trans[SN65HVD230<br/>CAN Transceiver]
         end
         
         subgraph "Control Section"

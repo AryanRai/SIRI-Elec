@@ -15,7 +15,7 @@ SIRI-Elec uses **Teensy 4.1** microcontrollers with **Arduino IDE** for HAT deve
 ### Hardware Requirements
 - **Teensy 4.1** development board
 - **USB-C cable** for programming
-- **CAN transceiver breakout** (TJA1050) for testing
+- **CAN transceiver breakout** (SN65HVD230) for testing
 - **Breadboard and jumper wires** for prototyping
 
 ### Software Requirements
@@ -251,7 +251,7 @@ Good prompts for HAT development:
 
 "Implement a CAN message handler for motor control on Teensy 4.1"
 "Review this state machine implementation for safety issues"
-"Explain how TJA1050 CAN transceiver works with Teensy"
+"Explain how SN65HVD230 CAN transceiver works with Teensy"
 "Optimize this code for real-time performance on embedded system"
 "Debug this FlexCAN_T4 initialization error"
 ```
@@ -385,7 +385,7 @@ Solutions:
 #### CAN Errors
 ```
 Solutions:
-1. Check TJA1050 wiring
+1. Check SN65HVD230 wiring
 2. Verify 120Ω termination
 3. Confirm baud rate (1 Mbps)
 4. Test with CAN analyzer

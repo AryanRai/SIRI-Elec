@@ -281,7 +281,7 @@ struct TelemetryMessage {
 
 #### Hardware Requirements
 - **Jetson Backplane**: SN65HVD230 (3.3V compatible with Jetson GPIO)
-- **HAT Modules (Teensy)**: TJA1050 (5V tolerant, robust for distributed modules)
+- **HAT Modules (Teensy)**: SN65HVD230 (3.3V compatible with Teensy 4.1 GPIO)
 
 #### Transceiver Specifications
 ```cpp
@@ -290,8 +290,8 @@ struct TelemetryMessage {
 #define JETSON_CAN_VOLTAGE 3.3f
 
 // HAT Module Configuration  
-#define HAT_CAN_TRANSCEIVER "TJA1050"
-#define HAT_CAN_VOLTAGE 5.0f
+#define HAT_CAN_TRANSCEIVER "SN65HVD230"
+#define HAT_CAN_VOLTAGE 3.3f
 ```
 
 ### Implementation Guidelines

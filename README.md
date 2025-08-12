@@ -30,7 +30,7 @@ graph TB
         subgraph "HAT Modules"
             subgraph "DriveHat - Priority 2"
                 D_MCU[Microcontroller]
-                D_CAN[TJA1050]
+                D_CAN[SN65HVD230]
                 D_Drive[Drive Motors<br/>0x210-0x213]
                 D_Steer[Steer Motors<br/>0x214-0x217]
                 D_DriveEnc[Drive Encoders<br/>0x220-0x223]
@@ -47,7 +47,7 @@ graph TB
             
             subgraph "ArmHat - Priority 4"
                 A_MCU[Microcontroller]
-                A_CAN[TJA1050]
+                A_CAN[SN65HVD230]
                 A_Joints[Joint Controllers<br/>0x410-0x414]
                 A_Feedback[Position Feedback<br/>0x420-0x42F]
                 A_Force[Force/Torque<br/>0x430-0x43F]
@@ -60,7 +60,7 @@ graph TB
             
             subgraph "BPS - Priority 3"
                 B_MCU[Microcontroller]
-                B_CAN[TJA1050]
+                B_CAN[SN65HVD230]
                 B_Voltage[Voltage Monitor<br/>0x310-0x31F]
                 B_Current[Current Monitor<br/>0x320-0x32F]
                 B_Temp[Temperature<br/>0x330-0x33F]
@@ -75,7 +75,7 @@ graph TB
             
             subgraph "SenseHat - Priority 6"
                 S_MCU[Microcontroller]
-                S_CAN[TJA1050]
+                S_CAN[SN65HVD230]
                 S_IMU[IMU Sensors<br/>0x610-0x61F]
                 S_Env[Environmental<br/>0x620-0x64F]
                 S_GPS[GPS Module<br/>0x650-0x65F]
@@ -88,7 +88,7 @@ graph TB
             
             subgraph "SciHat - Priority 5"
                 SC_MCU[Microcontroller]
-                SC_CAN[TJA1050]
+                SC_CAN[SN65HVD230]
                 SC_Sample[Sample Collection<br/>0x510-0x51F]
                 SC_Spec[Spectrometer<br/>0x520-0x52F]
                 SC_Cam[Cameras<br/>0x530-0x53F]
@@ -147,12 +147,12 @@ graph TB
         end
         
         subgraph "HAT Connectors"
-            Slot1[Slot 1<br/>40-pin]
-            Slot2[Slot 2<br/>40-pin]
-            Slot3[Slot 3<br/>40-pin]
-            Slot4[Slot 4<br/>40-pin]
-            Slot5[Slot 5<br/>40-pin]
-            Slot6[Slot 6<br/>40-pin]
+            Slot1[Slot 1<br/>VGA Connector]
+            Slot2[Slot 2<br/>VGA Connector]
+            Slot3[Slot 3<br/>VGA Connector]
+            Slot4[Slot 4<br/>VGA Connector]
+            Slot5[Slot 5<br/>VGA Connector]
+            Slot6[Slot 6<br/>VGA Connector]
         end
     end
     
@@ -201,17 +201,17 @@ graph TB
 
 #### HAT Modules
 - **TemplateHAT**: Base template for creating new HAT modules
-- **ArmHAT**: Robotic arm control and actuation (Teensy + TJA1050)
-- **DriveHat**: 4-wheel independent drive and steer control with encoders (Teensy + TJA1050)
-- **BPS**: Battery protection and power management (Teensy + TJA1050)
-- **SciHat**: Scientific payload control (Teensy + TJA1050)
-- **SenseHat**: Environmental and onboard sensing (Teensy + TJA1050)
+- **ArmHAT**: Robotic arm control and actuation (Teensy + SN65HVD230)
+- **DriveHat**: 4-wheel independent drive and steer control with encoders (Teensy + SN65HVD230)
+- **BPS**: Battery protection and power management (Teensy + SN65HVD230)
+- **SciHat**: Scientific payload control (Teensy + SN65HVD230)
+- **SenseHat**: Environmental and onboard sensing (Teensy + SN65HVD230)
 
 ### Modular Design Benefits
 - **Hot-swappable**: HATs can be replaced without system shutdown
 - **Scalable**: Add new functionality by creating new HAT modules
 - **Fault isolation**: Individual HAT failures don't affect other systems
-- **Standardized interface**: All HATs use same 40-pin connector and CAN protocol
+- **Standardized interface**: All HATs use same VGA connector and CAN protocol
 - **Development friendly**: Test individual HATs independently
 
 ## Network Architecture
