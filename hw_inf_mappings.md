@@ -26,7 +26,7 @@ Components:
 - Emergency Stop: 0x010
 - Emergency Stop Response: 0x011-0x015
 ```
-The address of an Estop response varies depending on which Hat has responded. For instance if the DriveHat acknowledges the Estop response it will take the address 0x012.
+The address of an Estop response varies depending on which Hat has responded. For instance if the DriveHat acknowledges the Estop response, it will take the address 0x012.
 
 ### Jetson
 Currently, no messages have priority Jetson. 
