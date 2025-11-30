@@ -270,5 +270,5 @@ Data: [MOTOR_LEFT_FRONT, SPEED_HIGH, DIRECTION_FORWARD, 0, 0, 0, 0, 0]
 
 This structure ensures consistent addressing across all HATs while allowing for HAT-specific component implementations and mission-specific state management.
 
-## Sample Mapping
+## Mapping Implementation
 The mappings can be found in the following [file](https://github.sydney.edu.au/Sydney-Interplanetary-Rover-Initiative/sirius-hardware/blob/main/src/sirius_can/include/sirius_can/can_map.hpp) for the Jetson.
