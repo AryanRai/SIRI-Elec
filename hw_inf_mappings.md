@@ -15,7 +15,7 @@ Based on the CAN arbitration system, lower priority numbers have higher preceden
 | 5 | 0x5 | BPS | Battery Protection System  | 0x500-0x5FF |
 | 6 | 0x6 | SenseHat | Environmental sensing | 0x600-0x6FF |
 
-For all address ranges, the main messages all start from address 0x\_10, this is to reserve the first 16 messages for future use.
+For all address ranges, the main messages all start from address 0x\_10, this is to reserve the first 16 messages for state machine operations.
 
 ## HAT Component Mappings
 
