@@ -7,14 +7,27 @@ Based on the CAN arbitration system, lower priority numbers have higher preceden
 
 | Priority | Node ID | HAT Name | Function | Address Range |
 |----------|---------|----------|----------|---------------|
-| 1 | 0x01 | Jetson | Main Compute Master | 0x100-0x1FF |
-| 2 | 0x02 | DriveHat | Drive motors and odometry | 0x200-0x2FF |
-| 3 | 0x03 | BPS | Battery Protection System | 0x300-0x3FF |
-| 4 | 0x04 | ArmHat | Robotic arm control | 0x400-0x4FF |
-| 5 | 0x05 | SciHat | Scientific payload | 0x500-0x5FF |
-| 6 | 0x06 | SenseHat | Environmental sensing | 0x600-0x6FF |
+| 0 | 0x0 | N/A    | High Priority Messages | 0x000-0x0FF|
+| 1 | 0x1 | Jetson | Main Compute Master | 0x100-0x1FF |
+| 2 | 0x2 | DriveHat | Drive motors and odometry | 0x200-0x2FF |
+| 3 | 0x3 | ArmHat | Robotic arm control | 0x300-0x3FF |
+| 4 | 0x4 | SciHat  | Scientific payload| 0x400-0x4FF |
+| 5 | 0x5 | BPS | Battery Protection System  | 0x500-0x5FF |
+| 6 | 0x6 | SenseHat | Environmental sensing | 0x600-0x6FF |
+
+For all address ranges, the main messages all start from address 0x\_10, this is to reserve the first 16 messages for future use.
 
 ## HAT Component Mappings
+
+### Priority Zero
+Priority zero is reserved for high priority messages. This includes emergency stop.
+```
+Components:
+- Emergency Stop: 0x010
+```
+
+### Jetson
+Currently, no messages have priority Jetson. 
 
 ### DriveHat (Priority 2, Base Address: 0x200)
 ```
@@ -42,37 +55,37 @@ Components:
 - IMU/Odometry: 0x230-0x23F
 ```
 
-### BPS (Priority 3, Base Address: 0x300)
+### ArmHat (Priority 3, Base Address: 0x300)
 ```
 Components:
-- Voltage Monitoring: 0x310-0x31F
-- Current Monitoring: 0x320-0x32F
-- Temperature Sensors: 0x330-0x33F
-- State of Charge: 0x340-0x34F
-- Emergency Shutdown: 0x3F0-0x3FF
+- Joint Controllers: 0x310-0x31F
+  - Base Joint: 0x310
+  - Shoulder Joint: 0x311
+  - Elbow Joint: 0x312
+  - Wrist Joint: 0x313
+  - End Effector: 0x314
+- Position Feedback: 0x320-0x32F
+- Force/Torque Sensors: 0x330-0x33F
 ```
 
-### ArmHat (Priority 4, Base Address: 0x400)
+### SciHat (Priority 4, Base Address: 0x500)
 ```
 Components:
-- Joint Controllers: 0x410-0x41F
-  - Base Joint: 0x410
-  - Shoulder Joint: 0x411
-  - Elbow Joint: 0x412
-  - Wrist Joint: 0x413
-  - End Effector: 0x414
-- Position Feedback: 0x420-0x42F
-- Force/Torque Sensors: 0x430-0x43F
+- Sample Collection: 0x410-0x41F
+- Spectrometer: 0x420-0x42F
+- Camera Systems: 0x430-0x43F
+- Environmental Sensors: 0x440-0x44F
 ```
 
-### SciHat (Priority 5, Base Address: 0x500)
+### BPS (Priority 5, Base Address: 0x500)
 ```
 Components:
-- Sample Collection: 0x510-0x51F
-- Spectrometer: 0x520-0x52F
-- Camera Systems: 0x530-0x53F
-- Environmental Sensors: 0x540-0x54F
+- Voltage Monitoring: 0x510-0x51F
+- Current Monitoring: 0x520-0x52F
+- Temperature Sensors: 0x530-0x53F
+- State of Charge: 0x540-0x54F
 ```
+
 
 ### SenseHat (Priority 6, Base Address: 0x600)
 ```
@@ -86,21 +99,12 @@ Components:
 
 ## Message Structure Format
 
-### Extended CAN ID Format (29-bit)
+### CAN ID Format (11 bits)
 ```
-Bits 28-24: Priority (5 bits)
-Bits 23-16: Source Node ID (8 bits)
-Bits 15-8:  Target Node ID (8 bits) - 0xFF for broadcast
-Bits 7-0:   Message Type/Register (8 bits)
+Bits 11-9: Priority (3 bits)
+Bits 8-0: Message Type (8 bits) 
 ```
 
-### Message Types
-- 0x00-0x0F: Control Commands
-- 0x10-0x1F: Status Requests
-- 0x20-0x2F: Telemetry Data
-- 0x30-0x3F: State Machine Commands
-- 0x40-0x4F: Configuration
-- 0xF0-0xFF: Emergency/System Messages
 
 ## State Machine Address Mappings
 
@@ -108,13 +112,14 @@ Bits 7-0:   Message Type/Register (8 bits)
 Each HAT reserves addresses for state machine operations:
 
 ```
-State Machine Base: HAT_BASE_ADDRESS + 0xF0
-- State Query: 0xF0
-- State Response: 0xF1
-- State Transition: 0xF2
-- Emergency Stop: 0xF3
-- Authority Check: 0xF4
-- Timeout Config: 0xF5
+State Machine Base: HAT_BASE_ADDRESS
+- Heartbeat Request - 0x06
+- Heartbeat Response - 0x07
+- State Query: 0x08
+- State Response: 0x09
+- State Transition: 0x0A
+- Authority Check: 0x0B
+- Timeout Config: 0x0C
 ```
 
 ### State-Specific Component Access
@@ -262,3 +267,6 @@ Data: [MOTOR_LEFT_FRONT, SPEED_HIGH, DIRECTION_FORWARD, 0, 0, 0, 0, 0]
 ```
 
 This structure ensures consistent addressing across all HATs while allowing for HAT-specific component implementations and mission-specific state management.
+
+## Sample Mapping
+The mappings can be found in the following [file](https://github.sydney.edu.au/Sydney-Interplanetary-Rover-Initiative/sirius-hardware/blob/main/src/sirius_can/include/sirius_can/can_map.hpp) for the Jetson.
