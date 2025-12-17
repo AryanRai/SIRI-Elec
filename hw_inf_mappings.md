@@ -44,9 +44,26 @@ Components:
   - Right Front Encoder: 0x221
   - Left Rear Encoder: 0x222
   - Right Rear Encoder: 0x223
+- Reset Odometry: 0x230
 ```
 
-The traction and steering commands are sent in 1 frame to reduce the number of frames. The first 4 bytes of the CAN frame are used to encode the traction commands, and the last 4 bytes are used to encode the steering commands. The commands are encoded as 32 bit floating point numbers. See the following [code](https://github.sydney.edu.au/Sydney-Interplanetary-Rover-Initiative/sirius-hardware/blob/main/src/sirius_drive/src/sirius_drive.cpp) for an example of how the data payload are encoded and decoded.
+#### Bit Packing
+
+The traction and steering commands are sent in 1 frame to reduce the number of frames. The first 4 bytes of the CAN frame are used to encode the drive commands, and the last 4 bytes are used to encode the steering commands. The commands are encoded as 32 bit floating point numbers. See the following [code](https://github.sydney.edu.au/Sydney-Interplanetary-Rover-Initiative/sirius-hardware/blob/main/src/sirius_drive/src/sirius_drive.cpp) for an example of how the data payload are encoded and decoded. 
+
+#### Definition Table
+The following table is a summary of the encoding of the commands and the encoders.
+
+| Function |  Address | Meaning |  Unit | Data Type
+|----------|----------|--------|--------| ---- |
+| Drive Command | 0x210-0x213 (HIGH BYTES) | Target angular velocity of the wheels | rad/s | float |
+| Steering Command | 0x210-0x213 (LOW BYTES) | Target steering angle  | rad | float |
+| Drive Encoder Reading | 0x220-0x223 (HIGH BYTES) | Actual angular position of the wheels | rad | float |
+| Steering Encoder Reading | 0x220-0x223 (LOW BYTES) | Actual steering angle of the wheels | rad | float |
+
+Note that angular position means the following. When the motor controller turns on, the angular position is 0. The moment the wheels move, the angular position changes relative to the start. For instance, if the wheels had moved for 1 rad/s for 2 seconds, the angular position is now 2 radians. Angular position can be negative if the wheels turn the other way. 
+
+To reset the angular position, send the "reset odometry" command with a data payload containing nothing.
 
 ### ArmHat (Priority 3, Base Address: 0x300)
 ```
