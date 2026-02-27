@@ -7,72 +7,95 @@ Based on the CAN arbitration system, lower priority numbers have higher preceden
 
 | Priority | Node ID | HAT Name | Function | Address Range |
 |----------|---------|----------|----------|---------------|
-| 1 | 0x01 | Jetson | Main Compute Master | 0x100-0x1FF |
-| 2 | 0x02 | DriveHat | Drive motors and odometry | 0x200-0x2FF |
-| 3 | 0x03 | BPS | Battery Protection System | 0x300-0x3FF |
-| 4 | 0x04 | ArmHat | Robotic arm control | 0x400-0x4FF |
-| 5 | 0x05 | SciHat | Scientific payload | 0x500-0x5FF |
-| 6 | 0x06 | SenseHat | Environmental sensing | 0x600-0x6FF |
+| 0 | 0x0 | N/A    | High Priority Messages | 0x000-0x0FF|
+| 1 | 0x1 | Jetson | Main Compute Master | 0x100-0x1FF |
+| 2 | 0x2 | DriveHat | Drive motors and odometry | 0x200-0x2FF |
+| 3 | 0x3 | ArmHat | Robotic arm control | 0x300-0x3FF |
+| 4 | 0x4 | SciHat  | Scientific payload| 0x400-0x4FF |
+| 5 | 0x5 | BPS | Battery Protection System  | 0x500-0x5FF |
+| 6 | 0x6 | SenseHat | Environmental sensing | 0x600-0x6FF |
+
+For all address ranges, the main messages all start from address 0x\_10, this is to reserve the first 16 messages for state machine operations.
 
 ## HAT Component Mappings
+
+### Priority Zero
+Priority zero is reserved for high priority messages. This includes emergency stop.
+```
+Components:
+- Emergency Stop: 0x010
+- Emergency Stop Response: 0x011-0x015
+```
+The address of an Estop response varies depending on which Hat has responded. For instance if the DriveHat acknowledges the Estop response, it will take the address 0x012.
+
+### Jetson
+Currently, no messages have priority Jetson. 
 
 ### DriveHat (Priority 2, Base Address: 0x200)
 ```
 Components:
-- Drive Motor Controllers: 0x210-0x217
-  - Left Front Drive: 0x210
-  - Right Front Drive: 0x211
-  - Left Rear Drive: 0x212
-  - Right Rear Drive: 0x213
-- Steer Motor Controllers: 0x214-0x217
-  - Left Front Steer: 0x214
-  - Right Front Steer: 0x215
-  - Left Rear Steer: 0x216
-  - Right Rear Steer: 0x217
-- Drive Encoders: 0x220-0x227
-  - Left Front Drive Encoder: 0x220
-  - Right Front Drive Encoder: 0x221
-  - Left Rear Drive Encoder: 0x222
-  - Right Rear Drive Encoder: 0x223
-- Steer Encoders: 0x224-0x227
-  - Left Front Steer Encoder: 0x224
-  - Right Front Steer Encoder: 0x225
-  - Left Rear Steer Encoder: 0x226
-  - Right Rear Steer Encoder: 0x227
-- IMU/Odometry: 0x230-0x23F
+- Motor Controllers: 0x210-0x217
+  - Left Front: 0x210
+  - Right Front: 0x211
+  - Left Rear: 0x212
+  - Right Rear: 0x213
+- Encoders: 0x220-0x227
+  - Left Front Encoder: 0x220
+  - Right Front Encoder: 0x221
+  - Left Rear Encoder: 0x222
+  - Right Rear Encoder: 0x223
+- Reset Odometry: 0x230
 ```
 
-### BPS (Priority 3, Base Address: 0x300)
+#### Bit Packing
+
+The traction and steering commands are sent in 1 frame to reduce the number of frames. The first 4 bytes of the CAN frame are used to encode the drive commands, and the last 4 bytes are used to encode the steering commands. The commands are encoded as 32 bit floating point numbers. See the following [code](https://github.sydney.edu.au/Sydney-Interplanetary-Rover-Initiative/sirius-hardware/blob/main/src/sirius_drive/src/sirius_drive.cpp) for an example of how the data payload are encoded and decoded. 
+
+#### Definition Table
+The following table is a summary of the encoding of the commands and the encoders.
+
+| Function |  Address | Meaning |  Unit | Data Type
+|----------|----------|--------|--------| ---- |
+| Drive Command | 0x210-0x213 (HIGH BYTES) | Target angular velocity of the wheels | rad/s | float |
+| Steering Command | 0x210-0x213 (LOW BYTES) | Target steering angle  | rad | float |
+| Drive Encoder Reading | 0x220-0x223 (HIGH BYTES) | Actual angular position of the wheels | rad | float |
+| Steering Encoder Reading | 0x220-0x223 (LOW BYTES) | Actual steering angle of the wheels | rad | float |
+
+Note that angular position means the following. When the motor controller turns on, the angular position is 0. The moment the wheels move, the angular position changes relative to the start. For instance, if the wheels had moved for 1 rad/s for 2 seconds, the angular position is now 2 radians. Angular position can be negative if the wheels turn the other way. 
+
+To reset the angular position, send the "reset odometry" command with a data payload containing nothing.
+
+### ArmHat (Priority 3, Base Address: 0x300)
 ```
 Components:
-- Voltage Monitoring: 0x310-0x31F
-- Current Monitoring: 0x320-0x32F
-- Temperature Sensors: 0x330-0x33F
-- State of Charge: 0x340-0x34F
-- Emergency Shutdown: 0x3F0-0x3FF
+- Joint Controllers: 0x310-0x31F
+  - Base Joint: 0x310
+  - Shoulder Joint: 0x311
+  - Elbow Joint: 0x312
+  - Wrist Joint: 0x313
+  - End Effector: 0x314
+- Position Feedback: 0x320-0x32F
+- Force/Torque Sensors: 0x330-0x33F
 ```
 
-### ArmHat (Priority 4, Base Address: 0x400)
+### SciHat (Priority 4, Base Address: 0x500)
 ```
 Components:
-- Joint Controllers: 0x410-0x41F
-  - Base Joint: 0x410
-  - Shoulder Joint: 0x411
-  - Elbow Joint: 0x412
-  - Wrist Joint: 0x413
-  - End Effector: 0x414
-- Position Feedback: 0x420-0x42F
-- Force/Torque Sensors: 0x430-0x43F
+- Sample Collection: 0x410-0x41F
+- Spectrometer: 0x420-0x42F
+- Camera Systems: 0x430-0x43F
+- Environmental Sensors: 0x440-0x44F
 ```
 
-### SciHat (Priority 5, Base Address: 0x500)
+### BPS (Priority 5, Base Address: 0x500)
 ```
 Components:
-- Sample Collection: 0x510-0x51F
-- Spectrometer: 0x520-0x52F
-- Camera Systems: 0x530-0x53F
-- Environmental Sensors: 0x540-0x54F
+- Voltage Monitoring: 0x510-0x51F
+- Current Monitoring: 0x520-0x52F
+- Temperature Sensors: 0x530-0x53F
+- State of Charge: 0x540-0x54F
 ```
+
 
 ### SenseHat (Priority 6, Base Address: 0x600)
 ```
@@ -86,21 +109,12 @@ Components:
 
 ## Message Structure Format
 
-### Extended CAN ID Format (29-bit)
+### CAN ID Format (11 bits)
 ```
-Bits 28-24: Priority (5 bits)
-Bits 23-16: Source Node ID (8 bits)
-Bits 15-8:  Target Node ID (8 bits) - 0xFF for broadcast
-Bits 7-0:   Message Type/Register (8 bits)
+Bits 11-9: Priority (3 bits)
+Bits 8-0: Message Type (8 bits) 
 ```
 
-### Message Types
-- 0x00-0x0F: Control Commands
-- 0x10-0x1F: Status Requests
-- 0x20-0x2F: Telemetry Data
-- 0x30-0x3F: State Machine Commands
-- 0x40-0x4F: Configuration
-- 0xF0-0xFF: Emergency/System Messages
 
 ## State Machine Address Mappings
 
@@ -108,13 +122,14 @@ Bits 7-0:   Message Type/Register (8 bits)
 Each HAT reserves addresses for state machine operations:
 
 ```
-State Machine Base: HAT_BASE_ADDRESS + 0xF0
-- State Query: 0xF0
-- State Response: 0xF1
-- State Transition: 0xF2
-- Emergency Stop: 0xF3
-- Authority Check: 0xF4
-- Timeout Config: 0xF5
+State Machine Base: HAT_BASE_ADDRESS
+- Heartbeat Request - 0x06
+- Heartbeat Response - 0x07
+- State Query: 0x08
+- State Response: 0x09
+- State Transition: 0x0A
+- Authority Check: 0x0B
+- Timeout Config: 0x0C
 ```
 
 ### State-Specific Component Access
@@ -262,3 +277,6 @@ Data: [MOTOR_LEFT_FRONT, SPEED_HIGH, DIRECTION_FORWARD, 0, 0, 0, 0, 0]
 ```
 
 This structure ensures consistent addressing across all HATs while allowing for HAT-specific component implementations and mission-specific state management.
+
+## Mapping Implementation
+The mappings can be found in the following [file](https://github.sydney.edu.au/Sydney-Interplanetary-Rover-Initiative/sirius-hardware/blob/main/src/sirius_can/include/sirius_can/can_map.hpp) for the Jetson.
